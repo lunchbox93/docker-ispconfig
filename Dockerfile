@@ -67,14 +67,14 @@ RUN apt-get -y install amavisd-new spamassassin clamav clamav-daemon zoo unzip b
 ADD ./etc/clamav/clamd.conf /etc/clamav/clamd.conf
 RUN service spamassassin stop && systemctl disable spamassassin
 
-# --- 9.1 Install Metronome XMPP Server
-RUN echo "deb http://packages.prosody.im/debian jessie main" > /etc/apt/sources.list.d/metronome.list
-RUN wget http://prosody.im/files/prosody-debian-packages.key -O - | apt-key add -
-RUN apt-get -qq update && apt-get -y -qq install git lua5.1 liblua5.1-0-dev lua-filesystem libidn11-dev libssl-dev lua-zlib lua-expat lua-event lua-bitop lua-socket lua-sec luarocks luarocks
-RUN luarocks install lpc
-RUN adduser --no-create-home --disabled-login --gecos 'Metronome' metronome
-RUN cd /opt && git clone https://github.com/maranda/metronome.git metronome
-RUN cd /opt/metronome && ./configure --ostype=debian --prefix=/usr && make && make install
+# # --- 9.1 Install Metronome XMPP Server
+# RUN echo "deb http://packages.prosody.im/debian jessie main" > /etc/apt/sources.list.d/metronome.list
+# RUN wget http://prosody.im/files/prosody-debian-packages.key -O - | apt-key add -
+# RUN apt-get -qq update && apt-get -y -qq install git lua5.1 liblua5.1-0-dev lua-filesystem libidn11-dev libssl-dev lua-zlib lua-expat lua-event lua-bitop lua-socket lua-sec luarocks luarocks
+# RUN luarocks install lpc
+# RUN adduser --no-create-home --disabled-login --gecos 'Metronome' metronome
+# RUN cd /opt && git clone https://github.com/maranda/metronome.git metronome
+# RUN cd /opt/metronome && ./configure --ostype=debian --prefix=/usr && make && make install
 
 # --- 10 Install Apache2, PHP5, phpMyAdmin, FCGI, suExec, Pear, And mcrypt
 RUN echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections \
@@ -93,36 +93,36 @@ RUN a2enmod actions proxy_fcgi alias
 # RUN apt-get -y install libapache2-mod-fastcgi php5-fpm
 # RUN a2enmod actions fastcgi alias
 
-# --- 13 Install Mailman
-RUN echo 'mailman mailman/default_server_language en' | debconf-set-selections
-RUN apt-get -y install mailman
-# RUN ["/usr/lib/mailman/bin/newlist", "-q", "mailman", "mail@mail.com", "pass"]
-ADD ./etc/aliases /etc/aliases
-RUN newaliases
-RUN ln -s /etc/mailman/apache.conf /etc/apache2/conf-enabled/mailman.conf
+# # --- 13 Install Mailman
+# RUN echo 'mailman mailman/default_server_language en' | debconf-set-selections
+# RUN apt-get -y install mailman
+# # RUN ["/usr/lib/mailman/bin/newlist", "-q", "mailman", "mail@mail.com", "pass"]
+# ADD ./etc/aliases /etc/aliases
+# RUN newaliases
+# RUN ln -s /etc/mailman/apache.conf /etc/apache2/conf-enabled/mailman.conf
 
-# --- 14 Install PureFTPd And Quota
-# RUN apt-get -y install pure-ftpd-common pure-ftpd-mysql quota quotatool
+# # --- 14 Install PureFTPd And Quota
+# # RUN apt-get -y install pure-ftpd-common pure-ftpd-mysql quota quotatool
 
-# --- 14 Install PureFTPd And Quota
-# install package building helpers
-RUN apt-get -qq -y --force-yes install dpkg-dev debhelper openbsd-inetd debian-keyring
-# install dependancies
-RUN apt-get -y -qq build-dep pure-ftpd
-# build from source
-RUN mkdir /tmp/pure-ftpd-mysql/ && \
-    cd /tmp/pure-ftpd-mysql/ && \
-    apt-get -qq source pure-ftpd-mysql && \
-    cd pure-ftpd-* && \
-    sed -i '/^optflags=/ s/$/ --without-capabilities/g' ./debian/rules && \
-    dpkg-buildpackage -b -uc > /tmp/pureftpd-build-stdout.txt 2> /tmp/pureftpd-build-stderr.txt
-# install the new deb files
-RUN dpkg -i /tmp/pure-ftpd-mysql/pure-ftpd-common*.deb && dpkg -i /tmp/pure-ftpd-mysql/pure-ftpd-mysql*.deb
-# Prevent pure-ftpd upgrading
-RUN apt-mark hold pure-ftpd-common pure-ftpd-mysql
-# setup ftpgroup and ftpuser
-RUN groupadd ftpgroup && useradd -g ftpgroup -d /dev/null -s /etc ftpuser
-RUN apt-get -qq update && apt-get -y -qq install quota quotatool
+# # --- 14 Install PureFTPd And Quota
+# # install package building helpers
+# RUN apt-get -qq -y --force-yes install dpkg-dev debhelper openbsd-inetd debian-keyring
+# # install dependancies
+# RUN apt-get -y -qq build-dep pure-ftpd
+# # build from source
+# RUN mkdir /tmp/pure-ftpd-mysql/ && \
+#     cd /tmp/pure-ftpd-mysql/ && \
+#     apt-get -qq source pure-ftpd-mysql && \
+#     cd pure-ftpd-* && \
+#     sed -i '/^optflags=/ s/$/ --without-capabilities/g' ./debian/rules && \
+#     dpkg-buildpackage -b -uc > /tmp/pureftpd-build-stdout.txt 2> /tmp/pureftpd-build-stderr.txt
+# # install the new deb files
+# RUN dpkg -i /tmp/pure-ftpd-mysql/pure-ftpd-common*.deb && dpkg -i /tmp/pure-ftpd-mysql/pure-ftpd-mysql*.deb
+# # Prevent pure-ftpd upgrading
+# RUN apt-mark hold pure-ftpd-common pure-ftpd-mysql
+# # setup ftpgroup and ftpuser
+# RUN groupadd ftpgroup && useradd -g ftpgroup -d /dev/null -s /etc ftpuser
+# RUN apt-get -qq update && apt-get -y -qq install quota quotatool
 #RUN /bin/bash -c 'sed -i "s/{{ SSLCERT_ORGANIZATION }}/${SSLCERT_ORGANIZATION}/g;s/{{ SSLCERT_UNITNAME }}/${SSLCERT_UNITNAME}/g;s/{{ SSLCERT_EMAIL }}/${SSLCERT_EMAIL}/g;s/{{ SSLCERT_LOCALITY }}/${SSLCERT_LOCALITY}/g;s/{{ SSLCERT_STATE }}/${SSLCERT_STATE}/g;s/{{ SSLCERT_COUNTRY }}/${SSLCERT_COUNTRY}/g;s/{{ SSLCERT_CN }}/${FQDN}/g" /root/config/openssl.cnf'
 #RUN openssl req -x509 -nodes -days 7300 -newkey rsa:4096 -config /root/config/openssl.cnf -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem
 #RUN chmod 600 /etc/ssl/private/pure-ftpd.pem
@@ -147,28 +147,28 @@ RUN apt-get -qq update && apt-get -y -qq install quota quotatool
 # RUN groupadd ftpgroup
 # RUN useradd -g ftpgroup -d /dev/null -s /etc ftpuser
 # RUN apt-get -y install quota quotatool
-ADD ./etc/default/pure-ftpd-common /etc/default/pure-ftpd-common
-RUN echo 1 > /etc/pure-ftpd/conf/TLS && mkdir -p /etc/ssl/private/
-# RUN openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem
-# RUN chmod 600 /etc/ssl/private/pure-ftpd.pem
+# ADD ./etc/default/pure-ftpd-common /etc/default/pure-ftpd-common
+# RUN echo 1 > /etc/pure-ftpd/conf/TLS && mkdir -p /etc/ssl/private/
+# # RUN openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem
+# # RUN chmod 600 /etc/ssl/private/pure-ftpd.pem
 
-# --- 15 Install BIND DNS Server
-RUN apt-get -y install bind9 dnsutils haveged
+# # --- 15 Install BIND DNS Server
+# RUN apt-get -y install bind9 dnsutils haveged
 
 # --- 16 Install Vlogger, Webalizer, And AWStats
 RUN apt-get -y install vlogger webalizer awstats geoip-database libclass-dbi-mysql-perl
 ADD etc/cron.d/awstats /etc/cron.d/
 
-# --- 17 Install Jailkit
-RUN apt-get -y install build-essential autoconf automake libtool flex bison debhelper binutils
-RUN cd /tmp \
-&& wget http://olivier.sessink.nl/jailkit/jailkit-2.19.tar.gz \
-&& tar xvfz jailkit-2.19.tar.gz \
-&& cd jailkit-2.19 \
-&& echo 5 > debian/compat \
-&& ./debian/rules binary \
-&& cd /tmp \
-&& dpkg -i jailkit_2.19-1_*.deb
+# # --- 17 Install Jailkit
+# RUN apt-get -y install build-essential autoconf automake libtool flex bison debhelper binutils
+# RUN cd /tmp \
+# && wget http://olivier.sessink.nl/jailkit/jailkit-2.19.tar.gz \
+# && tar xvfz jailkit-2.19.tar.gz \
+# && cd jailkit-2.19 \
+# && echo 5 > debian/compat \
+# && ./debian/rules binary \
+# && cd /tmp \
+# && dpkg -i jailkit_2.19-1_*.deb
 
 # --- 18 Install fail2ban
 RUN apt-get -y install fail2ban
@@ -183,9 +183,9 @@ RUN echo "ignoreregex =" >> /etc/fail2ban/filter.d/postfix-sasl.conf
 # ADD ./etc/squirrelmail/config.php /etc/squirrelmail/config.php
 # RUN mkdir /var/lib/squirrelmail/tmp
 # RUN chown www-data /var/lib/squirrelmail/tmp
-RUN service mysql start && apt-get -y install roundcube roundcube-core roundcube-mysql roundcube-plugins
-ADD ./etc/apache2/conf-enabled/roundcube.conf /etc/apache2/conf-enabled/roundcube.conf
-ADD ./etc/roundcube/config.inc.php /etc/roundcube/config.inc.php
+# RUN service mysql start && apt-get -y install roundcube roundcube-core roundcube-mysql roundcube-plugins
+# ADD ./etc/apache2/conf-enabled/roundcube.conf /etc/apache2/conf-enabled/roundcube.conf
+# ADD ./etc/roundcube/config.inc.php /etc/roundcube/config.inc.php
 
 # --- 20 Install ISPConfig 3
 RUN cd /root && wget http://www.ispconfig.org/downloads/ISPConfig-3-stable.tar.gz && tar xfz ISPConfig-3-stable.tar.gz
