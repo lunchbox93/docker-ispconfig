@@ -26,7 +26,7 @@ MAINTAINER Jeremie Robert <appydo@gmail.com> version: 0.2
 ENV DEBIAN_FRONTEND noninteractive
 
 # --- 1 Preliminary
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install rsyslog rsyslog-relp logrotate supervisor screenfetch
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install rsyslog patch apt-utils rsyslog-relp logrotate supervisor screenfetch
 # Create the log file to be able to run tail
 RUN touch /var/log/cron.log /var/log/auth.log
 
