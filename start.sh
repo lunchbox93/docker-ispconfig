@@ -29,6 +29,7 @@ if [ ! -f /usr/local/ispconfig/interface/lib/config.inc.php ]; then
 	# RUN mysqladmin -u root password pass
 	service mysql start && php -q /root/ispconfig3_install/install/install.php --autoinstall=/root/ispconfig3_install/install/autoinstall.ini
 	mkdir /var/www/html
+	service apache2 restart
 	echo "" > /var/www/html/index.html
 	rm -r /root/ispconfig3_install
 fi
